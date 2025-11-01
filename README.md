@@ -30,7 +30,7 @@ Una aplicación web completa desarrollada con **Spring Boot 3.5.7** que implemen
 
 1. **Clonar el repositorio**
    ```bash
-   git clone https://github.com/TU_USUARIO/prj-crud-spring-boot-mysql.git
+   git clone https://github.com/madelein-milagros/prj-crud-spring-boot-mysql.git
    cd prj-crud-spring-boot-mysql
 
 Configurar la base de datos

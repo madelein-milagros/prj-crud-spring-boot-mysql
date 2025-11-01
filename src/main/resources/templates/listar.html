@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Cursos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #a0d2eb;
+            --secondary: #e5eaf5;
+            --accent: #d0bdf4;
+            --success: #a8e6cf;
+            --warning: #ffd8be;
+            --danger: #ffafcc;
+            --dark: #495057;
+            --light: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            border: none;
+            padding: 2rem;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--accent));
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-custom-success {
+            background: linear-gradient(135deg, var(--success), #88d8b0);
+            border: none;
+            border-radius: 10px;
+            color: var(--dark);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(168, 230, 207, 0.4);
+        }
+
+        .btn-action {
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-info { background: var(--primary); border: none; }
+        .btn-warning { background: var(--warning); border: none; color: var(--dark); }
+        .btn-danger { background: var(--danger); border: none; color: var(--dark); }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            filter: brightness(110%);
+        }
+
+        .user-badge {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--dark);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/curso/listar}">
+            <i class="bi bi-journal-bookmark-fill me-2"></i>Sistema de Cursos
+        </a>
+        <div class="navbar-nav ms-auto">
+                <span class="user-badge me-3">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <span sec:authentication="name"></span>
+                </span>
+            <a th:href="@{/logout}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-box-arrow-right me-1"></i>Cerrar Sesión
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <!-- Mensajes -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <div class="flex-grow-1">
+            <span th:text="${success}"></span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div class="flex-grow-1">
+            <span th:text="${error}"></span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="main-card">
+        <div class="card-header-custom">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1"><i class="bi bi-list-ul me-2"></i>Listado de Cursos</h2>
+                    <p class="mb-0 opacity-75">Gestiona todos los cursos del sistema</p>
+                </div>
+                <div sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/curso/form}" class="btn btn-custom-success">
+                        <i class="bi bi-plus-circle me-1"></i> Nuevo Curso
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div th:if="${#lists.isEmpty(cursos)}" class="empty-state">
+                <i class="bi bi-inbox empty-state-icon"></i>
+                <h3 class="text-muted">No hay cursos registrados</h3>
+                <p class="text-muted mb-4">Comienza agregando el primer curso al sistema</p>
+                <div sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/curso/form}" class="btn btn-custom-success btn-lg">
+                        <i class="bi bi-plus-circle me-1"></i> Crear Primer Curso
+                    </a>
+                </div>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(cursos)}" class="row">
+                <div th:each="curso : ${cursos}" class="col-12">
+                    <div class="course-card">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="fw-bold text-primary mb-2" th:text="${curso.nombre}"></h5>
+                                <p class="text-muted mb-2" th:text="${curso.descripcion} ?: 'Sin descripción disponible'"></p>
+                                <div class="d-flex gap-4">
+                                    <small class="text-muted">
+                                        <i class="bi bi-person me-1"></i>
+                                        <span th:text="${curso.profesor}"></span>
+                                    </small>
+                                    <small class="text-muted">
+                                        <i class="bi bi-award me-1"></i>
+                                        <span th:text="${curso.creditos}"></span> créditos
+                                    </small>
+                                    <small class="text-muted">
+                                        <i class="bi bi-hash me-1"></i>
+                                        ID: <span th:text="${curso.id}"></span>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/curso/ver/} + ${curso.id}"
+                                       class="btn btn-info btn-action">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                    <a sec:authorize="hasRole('ADMIN')"
+                                       th:href="@{/curso/form/} + ${curso.id}"
+                                       class="btn btn-warning btn-action">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                    <a sec:authorize="hasRole('ADMIN')"
+                                       th:href="@{/curso/eliminar/} + ${curso.id}"
+                                       class="btn btn-danger btn-action"
+                                       onclick="return confirm('¿Está seguro de eliminar el curso \\'' + [[${curso.nombre}]] + '\\'?')">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
